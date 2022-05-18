@@ -5,6 +5,8 @@ The Kid From PaddleDetection —— 基于教学的检测平台搭建
 > 
 > Means: 基于PaddleDetection检测套件的检测全流程实现
 
+当前进度: 0/12
+
 - 0.实现数据加载(预处理)
     - 0.1 数据加载(dir at ./datasets): VOC + COCO
     - 0.2 数据预处理(dir at ./transforms): 图像预处理 + 架构输入预处理
