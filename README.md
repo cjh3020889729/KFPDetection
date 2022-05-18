@@ -5,6 +5,8 @@ The Kid From PaddleDetection —— 基于教学的检测平台搭建
 > 
 > Means: 基于PaddleDetection检测套件的检测全流程实现
 
+当前进度: 0/12
+
 - 0.实现数据加载(预处理)
 - 1.实现模块解耦
 - 2.实现自由组网
