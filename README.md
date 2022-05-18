@@ -1,4 +1,4 @@
-# KFPDetection
+# KFPDetection检测套件
 The Kid From PaddleDetection —— 基于教学的检测平台搭建
 
 > Package Name: The Kid from PaddleDetection
