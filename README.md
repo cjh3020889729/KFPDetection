@@ -8,7 +8,7 @@ The Kid From PaddleDetection —— 基于教学的检测平台搭建
 >
 > Package Name: The Kid from PaddleDetection
 > 
-> Means: 基于PaddleDetection检测套件的检测全流程实现
+> Means: 参考PaddleDetection检测套件的一个目标检测平台全流程实现
 
 当前进度: 1.5/12
 > over-6.1
