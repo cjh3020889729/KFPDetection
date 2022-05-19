@@ -28,20 +28,25 @@
     - 输入参数:
         - logger_name: 日志器名称
         - save_path: 日志文件流保存时的目录/日志文件
+        
                      支持.txt与.log为念
     - 返回参数:
         - logging.Logger: 返回配置好的独立日志器
     - 函数解读:
         - 输入参数方面:
             - (logger_name)用于区分当前是否需要新建日志器
-            
+
                 同名日志器直接使用原始实例
             - (save_path)有时程序运行日志过多，保存在文件中可以避免丢失
         - 返回参数方面:
             - (logging.Logger)配置好的独立日志器可支持以下日志记录:
+
                 日志器.info("xxxxx")
+
                 日志器.warning("xxxxx")
+
                 日志器.error("xxxxx")
+
                 日志器.critical("xxxxx")
 
 2. 对于获取当前程序创建的所有日志器名称(logger.py):
