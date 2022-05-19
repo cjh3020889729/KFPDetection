@@ -20,7 +20,7 @@ from matplotlib import pyplot as plt
 
 from typing import Dict, Union, Sequence
 
-__all__ = ['visualize_img', 'visualize_bbox', 'visualize_det']
+__all__ = ['visualize_img', 'visualize_bbox', 'visualize_det', 'colormap']
 
 
 def colormap(rgb: bool=False) -> np.ndarray:
