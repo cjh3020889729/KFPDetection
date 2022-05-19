@@ -1,6 +1,9 @@
 # KFPDetection检测套件
 The Kid From PaddleDetection —— 基于教学的检测平台搭建
 
+> Start Date: 2022.5.19
+> End Date: ~
+>
 > Package Name: The Kid from PaddleDetection
 > 
 > Means: 基于PaddleDetection检测套件的检测全流程实现
