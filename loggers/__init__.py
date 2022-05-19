@@ -12,3 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # includes: logger init module
+from .logger import *
+
+__all__ = ['create_logger', 'get_created_logger_names']
