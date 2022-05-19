@@ -5,7 +5,8 @@ The Kid From PaddleDetection —— 基于教学的检测平台搭建
 > 
 > Means: 基于PaddleDetection检测套件的检测全流程实现
 
-当前进度: 0/12
+当前进度: 1/12
+> over-6
 
 - 0.实现数据加载(预处理)
     - 0.1 数据加载(dir at ./datasets): VOC + COCO
@@ -23,9 +24,10 @@ The Kid From PaddleDetection —— 基于教学的检测平台搭建
 - 5.实现多种NMS
     - 5.1 对检测结果进行NMS处理(dir at ./nmses): 各种NMS算法
 - 6.实现可视化
-    - 6.1 可视化输出/输入(dir at ./visualizes): 不同的可视化
+    - 6.1 可视化输出(dir at ./visualizes): 检测结果可视化与预处理可视化
 - 7.实现日志记录
-    - 7.1 日志可视化记录(dir at ./vdlrecords): 不同类型的日志记录
+    - 7.1 日志可视化记录(dir at ./vdlrecords): 不同类型数据的日志记录
+    - 7.2 运行日志记录/输出(dir at ./loggers): 日志器
 - 8.实现模型导出
     - 8.1 模型导出(dir at ./tools): 训练模型的导出
 - 9.实现模型量化(TODO)
