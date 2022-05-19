@@ -109,9 +109,7 @@ def visualize_bbox(bboxs: np.ndarray,
                    draw_board: np.ndarray,
                    score_threshold: float=0.5,
                    lables: Union[Sequence[str], Dict[int, str]]=None,
-                   use_rgb: bool=False,
-                   save_path: Union[None, str]=None,
-                   show_img: bool=False) -> np.ndarray:
+                   use_rgb: bool=False) -> np.ndarray:
     """可视化bbox
         desc(描述):
             Parameters:
@@ -125,9 +123,6 @@ def visualize_bbox(bboxs: np.ndarray,
                                  value: [0., 1.)
                 lables: 类别ID对应的类别名称(list|tuple|set|dict[int, str])
                 use_rgb: 背景图像格式是否为rgb格式(bool)
-                save_path: None或可视化结果图像的保存路径(str)
-                           如果为None，则不保存
-                show_img: 是否使用pyplot显示可视化结果(bool)
             Returns:
                 将边界框(当输入bboxs的shape为[N, 6]时包含类别)可视化
                 后的图像(numpy.ndarray)
@@ -141,6 +136,7 @@ def visualize_bbox(bboxs: np.ndarray,
     if isinstance(draw_board, str): # 为图像路径时
         if os.path.exists(draw_board): # 路径存在
             draw_board=Image.open(draw_board) # 读取图像
+            use_rgb=True # PIL.Image读取的图像格式为RGB
         else: # 不存在的路径，抛出值异常
             raise ValueError('img path does not exist.')
         draw_board=np.array(draw_board).astype('uint8') # 转换为numpy.ndarray数组数据-dtype为uint8
@@ -156,8 +152,9 @@ def visualize_bbox(bboxs: np.ndarray,
         draw_board = draw_board[:, :, :3]
     
     # 图像大小获取
-    scale_size = 512 # 字体以及线条大小缩放因子
     h, w, _ = draw_board.shape # 高、宽
+    # 绘制参数控制
+    scale_size = 512 # 字体以及线条大小缩放因子
     font_scale = max(min(max(h, w) / scale_size, 0.8), 0.5) # 字体scale
     font_thickness = int((max(h, w) / scale_size + 1) * 1.0) # 字体大小
     font_y_offset = font_thickness * 2 # 字体显示向上偏移一定像素
@@ -171,7 +168,7 @@ def visualize_bbox(bboxs: np.ndarray,
         cls_id =  box[0].item() if include_cls else None
         # 类别得分
         score = box[1].item() if include_cls else None
-        if score < score_threshold: # 跳过不满足的bbox
+        if score is not None and score < score_threshold: # 跳过不满足的bbox
             continue
         # 边界框
         bbox = box[2:] if include_cls else box
@@ -185,19 +182,22 @@ def visualize_bbox(bboxs: np.ndarray,
         
         # 绘制类别描述: class_name + score
         if cls_id is not None: # 存在类别信息时
-            cv2.putText(draw_board, lables[int(cls_id)] + '-' + str(round(score, 2)),
+            # 可视化class_name的预处理
+            # lables为None时直接使用class_id进行可视化
+            cls_name = lables[int(cls_id)] + '-' + str(round(score, 2)) if \
+                       lables is not None else str(int(cls_id)) + '-' + str(round(score, 2))
+            cv2.putText(draw_board, cls_name + '-' + str(round(score, 2)),
                         (int(bbox[0]), int(bbox[1])-font_y_offset), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=font_scale, color=_color, thickness=font_thickness)
 
-    # 可视化窗口展示与可视化结果图像保存
-    visualize_img(draw_board, save_path=save_path, show_img=show_img)
+    return draw_board
 
 def visualize_det(img, cls_and_bboxs,
                   score_threshold: float=0.5,
                   save_path: Union[None, str]=None,
                   lables: Union[Sequence[str], Dict[int, str]]=None,
                   use_rgb: bool=False,
-                  show_img: bool=False):
+                  show_img: bool=False) -> np.ndarray:
     """可视化检测模型的输出结果
         desc(描述):
             Parameters:
@@ -217,10 +217,15 @@ def visualize_det(img, cls_and_bboxs,
                 将边界框与类别可视化后的图像(numpy.ndarray)
                 shape: 与输入真实图像一致
     """
-    visualize_bbox(bboxs=cls_and_bboxs,
-                   draw_board=img,
-                   score_threshold=score_threshold,
-                   lables=lables,
-                   use_rgb=use_rgb,
-                   save_path=save_path,
-                   show_img=show_img)
+    # 可视化bbox到目标图像
+    visualize_result = visualize_bbox(bboxs=cls_and_bboxs,
+                                      draw_board=img,
+                                      score_threshold=score_threshold,
+                                      lables=lables,
+                                      use_rgb=use_rgb)
+
+    # 可视化窗口展示与可视化结果图像保存
+    visualize_img(visualize_result, save_path=save_path, show_img=show_img)
+
+    # 返回后续可能会用上的可视化结果
+    return visualize_result
