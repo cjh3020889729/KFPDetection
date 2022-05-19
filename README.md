@@ -9,6 +9,7 @@ weixin: cjh3020889729
 ---
 The Kid From PaddleDetection —— 基于教学的检测平台搭建
 
+> [手把手教学实践视频(未发布)](https://space.bilibili.com/97078476)
 
 > Start Date: 2022.5.18
 >
