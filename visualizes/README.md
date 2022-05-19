@@ -99,7 +99,7 @@
             - (前述充分，不再补充)
 
 4. 对于颜色表(det_visualize.py):
-    - 接口类型: 函数(visualize_det)
+    - 接口类型: 函数(colormap)
     - 来源: https://github.com/facebookresearch/Detectron/blob/main/detectron/utils/colormap.py
     - 函数用途:
         - 实现可视化不同类别所需的颜色向量(R, G, B)
