@@ -59,23 +59,36 @@
 
         - lables: 类别id与类别name的映射，可以是序列或字典[id->str]
         - use_rgb: 表示输入数据是不是rgb格式
-                   opencv读取的数据为bgr格式，则此处为False
-                   PIL读取的数据为rgb格式，则此处为True
-                   特别地，当draw_board为路径时，use_rgb设置无效，
-                   会强制为True——因为内部读取图像采用PIL.Image
+
+            opencv读取的数据为bgr格式，则此处为False
+
+            PIL读取的数据为rgb格式，则此处为True
+
+            特别地，当draw_board为路径时，use_rgb设置无效，
+
+            会强制为True——因为内部读取图像采用PIL.Image
+
     - 返回参数:
         - numpy.ndarray: 与输入目标图像等大的可视化结果
     - 函数解读
         - 输入参数方面:
             - (bboxs)目的是展示需要可视化的边界框，但是考虑模型输出可视化与数据预处理可视化两方面；
+                
                 因此，支持两种格式的输入——维度大小为4对应数据预处理，另外指向模型输出可视化
+
             - (draw_board)绘制边界框需要背景图像，因此传入目标图像数据作为背景进行可视化；
+                
                 同时支持图像路径的读取方式
+
             - (score_threshold)为了控制边界框的可视化，通过阈值来剔除不合格的边界框
             - (lables)在边界框包含类别id时，允许将可视化的类别id换为类别name(lables不为None)
+                
                 lables为None，则可视化保持str(id)进行可视化
+
             - (use_rgb)用于控制colormap中的色彩值顺序——rgb与bgr格式图像数据的colormap中单个类别颜色
+                
                 向量的元素值是倒序的
+                
         - 返回参数方面:
             - (numpy.ndarray)保证与输入目标图像等大的可视化结果，可用于其它处理/visualize_img可视化
 
