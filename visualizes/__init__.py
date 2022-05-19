@@ -14,4 +14,4 @@
 # includes: visualize init module
 from .det_visualize import *
 
-__all__ = ['visualize_img', 'visualize_bbox', 'visualize_det']
+__all__ = ['visualize_img', 'visualize_bbox', 'visualize_det', 'colormap']
