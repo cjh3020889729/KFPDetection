@@ -1,10 +1,14 @@
 # KFPDetection检测套件
 ---
 author: Jinghui Cai(红白黑)
+
 qq: 3020889727
+
 weixin: cjh3020889729
+
 ---
 The Kid From PaddleDetection —— 基于教学的检测平台搭建
+
 
 > Start Date: 2022.5.18
 >
