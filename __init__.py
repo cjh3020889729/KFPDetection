@@ -13,7 +13,11 @@
 # limitations under the License.
 # includes: KFPDetection Packages
 from visualizes import *
+from loggers import *
+from vdlrecords import *
 
 __all__ = [
-    'visualizes'
+    'visualizes',
+    'loggers',
+    'vdlrecords',
 ]

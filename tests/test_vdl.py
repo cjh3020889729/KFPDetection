@@ -11,26 +11,35 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# Test logger functions
+# Test vdlrecord functions
 import os
 import sys
 import numpy as np
 
 # 设置当前KFPDetection包路径:
-# 保证loggers正常调用
+# 保证vdlrecords正常调用
 sys.path.append( os.getcwd() )
 
-from loggers import create_logger
-from loggers import get_created_logger_names
+from visualdl import LogReader
+from vdlrecords import VDLCallback, ScalarVDL
 
-logger = create_logger(logger_name='test', save_path=None)
-logger2 = create_logger(logger_name='test.2', save_path=None)
+recorder = VDLCallback(
+    logdir='vlogs',
+    file_name='model.log',
+    vdl_kind='scalar',
+    tags=['train/loss'],
+    display_name='train_ex1'
+)
 
-logger.warning('hello logging!{0}'.format(__file__))
-logger.info('hello logging!')
-logger.error('hello logging!')
-# logger level==info > debug, 无法记录该级别的信息
-# 因此，处理器无法接收到该信息
-logger.debug('hello logging!')
+for i in range(100):
+    recorder(
+        tag='train/loss',
+        data=i
+    )
 
-logger.info(get_created_logger_names())
+recorder.release()
+
+log_path = os.path.join('vlogs', VDLCallback.log_base+'scalar'+'.'+'model.log')
+reader = LogReader(file_path=log_path)
+print(reader.get_tags())
+# print(reader.get_data('scalar', 'train/loss'))

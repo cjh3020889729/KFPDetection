@@ -19,6 +19,8 @@ from PIL import Image
 from matplotlib import pyplot as plt
 
 from typing import Dict, Union, Sequence
+from loggers import create_logger
+logger = create_logger(logger_name='det_visualize')
 
 __all__ = ['visualize_img', 'visualize_bbox', 'visualize_det', 'colormap']
 
@@ -82,12 +84,16 @@ def visualize_img(img: Union[np.ndarray, str],
         if os.path.exists(img): # 路径存在
             img=Image.open(img) # 读取图像
         else: # 不存在的路径，抛出值异常
-            raise ValueError('img path does not exist.')
+            logger.error('The img path does not exist.(path: {0})'.format(
+                img))
+            raise ValueError()
         img=np.array(img).astype('uint8') # 转换为numpy.ndarray数组数据-dtype为uint8
     elif isinstance(img, np.ndarray): # 为运行的图像数据
         img=img.astype('uint8') # 转换dtype为uint8
     else: # img类型异常，抛出类型异常
-        raise TypeError('img only support numpy.ndarray or str.')
+        logger.error('The img only support numpy.ndarray or str.(type: {0})'.format(
+            type(img)))
+        raise TypeError()
     
     if show_img:
         # 可视化窗口显示图像
@@ -101,9 +107,9 @@ def visualize_img(img: Union[np.ndarray, str],
     if save_path: # 路径不为None
         try: # 尝试保存图像
             cv2.imwrite(save_path, img)
-            print("Info: The visualize result has save at: {0}.".format(save_path))
+            logger.info("The visualize result has save at: {0}.".format(save_path))
         except :
-            print("Warning: The save_path is not a file.({0})".format(save_path))
+            logger.warning("The save_path is not a file.({0})".format(save_path))
 
 def visualize_bbox(bboxs: np.ndarray,
                    draw_board: np.ndarray,
@@ -138,12 +144,16 @@ def visualize_bbox(bboxs: np.ndarray,
             draw_board=Image.open(draw_board) # 读取图像
             use_rgb=True # PIL.Image读取的图像格式为RGB
         else: # 不存在的路径，抛出值异常
-            raise ValueError('img path does not exist.')
+            logger.error('The draw_board path does not exist.(path: {0})'.format(
+                draw_board))
+            raise ValueError()
         draw_board=np.array(draw_board).astype('uint8') # 转换为numpy.ndarray数组数据-dtype为uint8
     elif isinstance(draw_board, np.ndarray): # 为运行的图像数据
         draw_board=draw_board.astype('uint8') # 转换dtype为uint8
     else: # img类型异常，抛出类型异常
-        raise TypeError('img only support numpy.ndarray or str.')
+        logger.error('The img only support numpy.ndarray or str.(type: {0})'.format(
+            type(draw_board)))
+        raise TypeError()
 
     # 图像通道检查: 由于colormap为三通道的，所以强制所有可视化为三通道
     if len(draw_board.shape) == 1: # 单通道图像的处理方式

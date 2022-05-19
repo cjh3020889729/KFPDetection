@@ -70,7 +70,7 @@ def create_logger(logger_name: str='kfpdet',
     #   [时间] 当前日志信息的级别-日志记录器名称: 日志信息
     #   时间格式: 年-月-日 时-分-秒
     log_formatter = logging.Formatter(
-        fmt="[%(asctime)s] -%(levelname)s-\t%(name)s: %(message)s",
+        fmt="[%(asctime)s]\t-%(levelname)s-\t%(name)s: %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S"
     )
 
