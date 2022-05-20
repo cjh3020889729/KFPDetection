@@ -15,17 +15,21 @@ The Kid From PaddleDetection —— 基于教学的检测平台搭建
 >
 > End Date: ~
 >
+> Update Date: 2022.5.20
+>
 >
 > Package Name: The Kid from PaddleDetection
 > 
 > Means: 参考PaddleDetection检测套件的一个目标检测平台全流程实现
 
-当前进度: 1.5/12
+当前进度: 2/12
 > over-6.1
+> 
+> over-7.1
 > 
 > over-7.2
 > 
-> todo-7.1
+> todo-0.2
 
 - 0.实现数据加载(预处理)
     - 0.1 数据加载(dir at ./datasets): VOC + COCO
