@@ -14,4 +14,4 @@
 # includes: vdlrecord init module
 from .vdlrecord import *
 
-__all__ = ['VDLCallback', 'ScalarVDL']
+__all__ = ['clear_vdlrecord_dir', 'VDLCallback', 'ScalarVDL']

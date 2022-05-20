@@ -21,9 +21,11 @@ import numpy as np
 sys.path.append( os.getcwd() )
 
 from visualdl import LogReader
-from vdlrecords import VDLCallback, ScalarVDL
+from vdlrecords import clear_vdlrecord_dir
+from vdlrecords import ScalarVDL
 
-recorder = VDLCallback(
+# 1.创建标量日志记录器
+recorder = ScalarVDL(
     logdir='vlogs',
     file_name='model.log',
     vdl_kind='scalar',
@@ -31,15 +33,22 @@ recorder = VDLCallback(
     display_name='train_ex1'
 )
 
+# 2.测试指定tag自动写入数据
 for i in range(100):
     recorder(
         tag='train/loss',
         data=i
     )
 
+# 3.不再使用/读取日志文件前进行文件写句柄的释放
 recorder.release()
 
-log_path = os.path.join('vlogs', VDLCallback.log_base+'scalar'+'.'+'model.log')
+# 4.读取写好的日志文件
+log_path = os.path.join('vlogs', ScalarVDL.file_content+'scalar'+'.'+'model.log')
 reader = LogReader(file_path=log_path)
+# 5.输出日志中的部分数据
 print(reader.get_tags())
-# print(reader.get_data('scalar', 'train/loss'))
+print(reader.get_data('scalar', 'train/loss')[:10])
+
+# 6.测试vdl日志目录的清理功能
+clear_vdlrecord_dir(log_dir='vlogs', verbose=True)

@@ -12,14 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # includes: vdlrecord class
-from distutils.log import Log
+# 所有vdl日志类生成的日志文件格式均为:
+# vdlrecords.系统自动生成.log
+# 或者: vdlrecords.自定义日志文件名(vdlrecords.train_fcos.log)
 import os
 import sys
 import numpy as np
 
-from typing import Union
+from typing import Union, List, Any
 
-from loggers import create_logger
+from loggers import create_logger, error_traceback
 logger = create_logger(logger_name='vdlrecord')
 try:
     from visualdl import LogWriter, LogReader
@@ -27,45 +29,116 @@ except :
     logger.warning("The visualdl can't import LogWriter.")
     raise ImportError()
 
-__all__ = ['VDLCallback', 'ScalarVDL']
+__all__ = ['clear_vdlrecord_dir', 'VDLCallback', 'ScalarVDL']
 
 
-def clear_vdlrecord_dir(log_dir):
+def clear_vdlrecord_dir(log_dir: str='vlogs',
+                        split_content: str='.',
+                        file_content: str='vdlrecords',
+                        verbose: bool=False) -> None:
     """清空目标日志目录下的vdl日志文件
+        desc:
+            Parameters:
+                log_dir: vdl日志文件目录(str)
+                split_content: 文件名划分字段的分隔符(str) -- 默认不用修改
+                              eg: '.' --> 'file.txt' => ['file', 'txt']
+                file_content: 文件名主要组成字段(str) -- 默认不用修改
+                              eg: 'vdlrecords' -->
+                                  vdlrecords.1321415.log =>
+                                  ['vdlrecords', '1321415', 'log']
+                verbose: 是否显示运行时删除过程的详细信息(bool)
+            Returns:
+                None
     """
+    if not os.path.isdir(log_dir): # 待清空日志路径不是目录
+        try:
+            raise ValueError()
+        except:
+            error_traceback(logger=logger,
+                            lasterrorline_offset=6,
+                            num_lines=1)
+            logger.error("Summary: The log_dir should be a dir, but now it's not.(path at: {0})".format(
+                log_dir))
+            sys.exit(1)
+    if not os.path.exists(log_dir): # 待清空目录不存在
+        logger.warning('The log_dir is not exist.(path at: {0})'.format(
+            log_dir))
+        return
+    # 遍历目录下的所有文件
+    clear_num = 0 # 清楚日志文件数量
+    for _, _, files in os.walk(log_dir):
+        for vdl_f in files:
+            file_contents = vdl_f.split(split_content) # 按照split_content分割文件
+            # 按照所选文件名必须包含file_content来筛选
+            # 如果content出现在当前文件中，则进行清楚
+            if file_content in file_contents:
+                rm_path = os.path.join(log_dir, vdl_f)
+                os.remove(rm_path)
+                clear_num += 1
+                if verbose:
+                    logger.info('Removing the vdl_logfile: {0}.'.format(rm_path))
+            else: # 不存在，则跳过清理
+                continue
+    if verbose:
+        logger.info('The vdlrecord dir has cleared {0} vdl_log files.'.format(clear_num))
 
 
 class VDLCallback(object):
-    log_base = 'vdlrecords.'
+    file_content = 'vdlrecords.'
     def __init__(self,
-                 logdir='vlogs',
-                 file_name='',
-                 vdl_kind='',
-                 tags=['train/loss', 'eval/loss', 'test/loss'],
-                 display_name=''):
+                 logdir: str='vlogs',
+                 file_name: str='',
+                 vdl_kind: str='',
+                 tags: List[str]=['train/loss', 'eval/loss', 'test/loss'],
+                 display_name: str='') -> None:
         """visualdl日志器回调基类实现
             desc:
                 Parameters:
-
+                    logdir: 日志保存的目录(str)
+                    file_name: 日志文件名(str, 如果为''，则自动生成文件名)
+                               eg: file_name --> name.log
+                    vdl_kind: 当前vdl记录数据的格式(str)
+                              支持以下格式:
+                                - scalar: 标量记录(损失、学习率等标量数据)
+                                - image: 特征图/图像记录(预处理图像、特征图分析等)
+                                - histogram: 直方图数据记录(权重、梯度等张量数据)
+                                - pr_curve: PR曲线
+                                - roc_curve: roc曲线
+                               使用时务必指定，不能为''
+                    tags: 日志器需要记录的不同数据的标识字段(List(str))
+                    display_name: 日志可视化界面中显示的日志名称(str)
                 Returns:
-
+                    None
         """
         super(VDLCallback, self).__init__()
         # 0.检查数据有效性
         # 0.1检查日志记录的tags是否有效
         if len(tags) == 0: # 检查需要记录的tag不为0个
-            logger.error("The length of tags should be more than 0.")
-            raise ValueError()
+            try:
+                raise ValueError()
+            except:
+                error_traceback(logger=logger,
+                                lasterrorline_offset=6,
+                                num_lines=1)
+                logger.error("Summary: The length of tags should be more than 0.(tags: {0})".format(
+                    tags))
+                sys.exit(1)
 
         # 1.拼接符合要求的日志文件名
         self.log_filename = file_name if file_name=='' \
-            else self.log_base + vdl_kind + '.' + file_name
+            else self.file_content + vdl_kind + '.' + file_name
         # 2.检查日志文件名是否合理
         if self.log_filename!='': # 不为空时，检查是否为.log文件
             if not self.log_filename.endswith('.log'):
-                logger.error("The vdllog file_name should be '' or xxxx.log.(file_name: {0})".format(
-                    file_name))
-                raise ValueError()
+                try:
+                    raise ValueError()
+                except:
+                    error_traceback(logger=logger,
+                                    lasterrorline_offset=7,
+                                    num_lines=2)
+                    logger.error("Summary: The vdllog file_name should be '' or xxxx.log.(file_name: {0})".format(
+                        file_name))
+                    sys.exit(1)
         
         # 3.创建vdl日志记录器
         self._writer = LogWriter(
@@ -83,9 +156,9 @@ class VDLCallback(object):
         """获取当前日志记录器支持的tag列表
             desc:
                 Parameters:
-
+                    None
                 Returns:
-
+                    None
         """
         return list(self.tags_step.keys())
     
@@ -93,46 +166,56 @@ class VDLCallback(object):
         """释放已创建的LogWriter
             desc:
                 Parameters:
-
+                    None
                 Returns:
-
+                    None
         """
         self._writer.close()
 
     def update(self,
-               tag,
-               data):
+               tag: str,
+               data: Any) -> None:
         """更新日志记录器中的写入数据(新添日志数据)
             desc:
                 Parameters:
-
+                    tag: 当前数据所属tag(str)
+                    data: 日志记录的数据(对应记录器的数据)
                 Returns:
-
+                    None
         """
     
     def __call__(self,
-                 tag,
-                 data):
+                 tag: str,
+                 data: Any) -> None:
         """执行回调，完成指定tag的日志数据写入
             desc:
                 Parameters:
-
+                    tag: 当前数据所属tag(str)
+                    data: 日志记录的数据(对应记录器的数据)
                 Returns:
-                    
+                    None
         """
         if tag not in self.tags_step.keys():
-            logger.error("The tag don't exist, while the vdlwriter init.(tag: {0})".format(
-                tag))
-            raise ValueError()
+            try:
+                raise ValueError()
+            except:
+                error_traceback(logger=logger,
+                                lasterrorline_offset=6,
+                                num_lines=1)
+                logger.error("Summary: The tag don't exist, while the vdlwriter init.(tag: {0})".format(
+                    tag))
+                sys.exit(1)
         self.update(tag=tag, data=data)
 
 class ScalarVDL(VDLCallback):
     def __init__(self,
-                 logdir='vlogs',
-                 file_name='',
-                 vdl_kind='scalar',
-                 tags=['train/loss'],
-                 display_name=''):
+                 logdir: str='vlogs',
+                 file_name: str='',
+                 vdl_kind: str='',
+                 tags: List[str]=['train/loss'],
+                 display_name: str='') -> None:
+        """标量日志记录器
+        """
         super(ScalarVDL, self).__init__(
             logdir=logdir,
             file_name=file_name,
@@ -141,10 +224,22 @@ class ScalarVDL(VDLCallback):
             display_name=display_name
         )
     
-    def update(self, tag, data):
+    def update(self,
+               tag: str,
+               data: Any) -> None:
+        """更新日志记录器中的标量写入数据
+            desc:
+                Parameters:
+                    tag: 当前数据所属tag(str)
+                    data: 日志记录的数据(对应记录器的数据)
+                Returns:
+                    None
         """
-        """
-    
+        # 写入日志文件
+        self._writer.add_scalar(tag=tag,
+                                value=data,
+                                step=self.tags_step[tag])
+        self.tags_step[tag] += 1 # 更新为下一次待写入的step
 
 
 
