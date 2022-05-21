@@ -146,23 +146,34 @@ class VDLCallback(object):
             file_name=self.log_filename,
             display_name=display_name
         )
+        self.writer_state = True # 日志记录器开启状态
         
         # 4.创建记录器里每个tag记录用step参数
         #   随着对应tag在__call__中出现一次
         #   对应的step值+1
         self.tags_step = {k:0 for k in tags}
     
-    def get_tags(self):
+    def get_state(self) -> bool:
+        """获取当前日志器状态
+            desc:
+                Parameters:
+                    None
+                Return:
+                    (bool)当前日志器状态
+        """
+        return self.writer_state
+    
+    def get_tags(self) -> List[str]:
         """获取当前日志记录器支持的tag列表
             desc:
                 Parameters:
                     None
                 Returns:
-                    None
+                    (list(str))日志器的tags
         """
         return list(self.tags_step.keys())
     
-    def release(self):
+    def release(self) -> None:
         """释放已创建的LogWriter
             desc:
                 Parameters:
@@ -171,11 +182,46 @@ class VDLCallback(object):
                     None
         """
         self._writer.close()
+        self.writer_state = False # 日志记录器关闭/失效状态
+    
+    def reopen(self, logdir: str='vlogs',
+                     file_name: str='',
+                     vdl_kind: str='',
+                     tags: List[str]=['train/loss', 'eval/loss', 'test/loss'],
+                     display_name: str='') -> None:
+        """重启日志器
+            desc:
+                Parameters:
+                    logdir: 日志保存的目录(str)
+                    file_name: 日志文件名(str, 如果为''，则自动生成文件名)
+                               eg: file_name --> name.log
+                    vdl_kind: 当前vdl记录数据的格式(str)
+                              支持以下格式:
+                                - scalar: 标量记录(损失、学习率等标量数据)
+                                - image: 特征图/图像记录(预处理图像、特征图分析等)
+                                - histogram: 直方图数据记录(权重、梯度等张量数据)
+                                - pr_curve: PR曲线
+                                - roc_curve: roc曲线
+                               使用时务必指定，不能为''
+                    tags: 日志器需要记录的不同数据的标识字段(List(str))
+                    display_name: 日志可视化界面中显示的日志名称(str)
+                Returns:
+                    None
+        """
+        if self.writer_state == True: # 本身还在运行
+            self.release() # 释放已有日志器
+        
+        # 重调init完成初始化
+        self.__init__(logdir=logdir,
+                      file_name=file_name,
+                      vdl_kind=vdl_kind,
+                      tags=tags,
+                      display_name=display_name)
 
     def update(self,
                tag: str,
                data: Any) -> None:
-        """更新日志记录器中的写入数据(新添日志数据)
+        """更新日志记录器中的写入数据(新添日志数据--继承需实现)
             desc:
                 Parameters:
                     tag: 当前数据所属tag(str)
@@ -183,6 +229,15 @@ class VDLCallback(object):
                 Returns:
                     None
         """
+        try:
+            raise NotImplementedError()
+        except:
+            error_traceback(logger=logger,
+                            lasterrorline_offset=16,
+                            num_lines=13)
+            logger.error("Summary: The update function of"
+            " '{0}' class should be reload or implement.".format(self.__class__.__name__))
+            sys.exit(1)
     
     def __call__(self,
                  tag: str,
@@ -195,7 +250,16 @@ class VDLCallback(object):
                 Returns:
                     None
         """
-        if tag not in self.tags_step.keys():
+        if self.writer_state == False: # 检查工作状态
+            try:
+                raise AssertionError()
+            except:
+                error_traceback(logger=logger,
+                                lasterrorline_offset=6,
+                                num_lines=3)
+                logger.error("Summary: The writer_state is False, so vdlrecord's update order can't work.")
+                sys.exit(1)
+        if tag not in self.tags_step.keys(): # 检查tag是否有效
             try:
                 raise ValueError()
             except:
