@@ -90,21 +90,24 @@ def create_logger(logger_name: str='kfpdet',
     #   文件流处理器设日志级别为: DEBUG
     if save_path is not None: # 设置日志输出文件时，才执行添加
         # 判断文件是否符合要求
-        if os.path.isfile(save_path) and \
-           ( save_path.endswith('.txt') or save_path.endswith('.log') ):
+        if save_path.endswith('.txt') or save_path.endswith('.log'):
+           if os.path.dirname(save_path): # 如果文件路径中存在目录
+               # 检查目录是否存在
+               if not os.path.isdir(os.path.dirname(save_path)):
+                   # 不能存在则创建目录以保证日志文件正常生成
+                   os.makedirs(os.path.dirname(save_path))
            log_filename = save_path
-        elif os.path.isdir(save_path): # 目录情况
-            if not os.path.exists(save_path):
-                os.makedirs(save_path)
+        elif os.path.isdir(save_path): # 目录情况: 是否为已存在的目录
             log_filename = os.path.join(save_path, 'log.txt')
         else:
             try:
                 raise ValueError()
             except:
                 error_traceback(logger=logger,
-                                lasterrorline_offset=15,
-                                num_lines=12)
-                logger.error("Summary: The save_path should be a dir or ['*.txt', '*.log'].")
+                                lasterrorline_offset=17,
+                                num_lines=14)
+                logger.error("Summary: The save_path should be a existed"
+                    " dir or a file in ['*.txt', '*.log'].")
                 sys.exit(1)
 
         file_handler = logging.FileHandler(filename=log_filename, mode='a')
