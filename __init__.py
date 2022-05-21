@@ -15,9 +15,11 @@
 from visualizes import *
 from loggers import *
 from vdlrecords import *
+from datasets import *
 
 __all__ = [
-    'visualizes',
-    'loggers',
-    'vdlrecords',
+    'visualizes', # 可视化
+    'loggers', # 字节流日志记录
+    'vdlrecords', # 可视化日志记录
+    'datasets' # 数据集加载/解析
 ]

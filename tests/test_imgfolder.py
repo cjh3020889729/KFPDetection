@@ -11,16 +11,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from .det import *
-from .voc import *
-from .coco import *
-from .reader import *
-from .dataset import *
+import os
+import sys
+import numpy as np
 
-__all__ = [
-    'det',
-    'voc',
-    'coco',
-    'reader',
-    'dataset'
-]
+# 设置当前KFPDetection包路径:
+# 保证datasets正常调用
+sys.path.append( os.getcwd() )
+
+from datasets import ImageFolder
+
+# 测试图片文件夹数据集加载
+image_dataset = ImageFolder(
+                    dataset_dir='tests',
+                    image_dir='imgs',
+                    sample_num=-1
+                )
+# 解析样本集
+image_dataset.parse_dataset()
+# 获取图片id到路径的映射字典
+print(image_dataset.get_imid2path())
+# 获取解析后数据集中的样本
+print(image_dataset[0])
