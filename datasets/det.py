@@ -18,8 +18,26 @@ from typing import Any, Dict, List
 from loggers import create_logger, error_traceback
 logger = create_logger(logger_name=__name__)
 
-__all__ = ['DetDataset', 'ImageFolder']
+__all__ = ['check_img_endswith', 'DetDataset', 'ImageFolder']
 
+
+def check_img_endswith(img_file: str=None,
+                           img_endswith: List[str]=[
+                               'jpg', 'JPG', 'JPEG',
+                               'png', 'PNG',
+                               'bmp', 'BMP']) -> bool:
+    """检查图片类型是否为支持的图片文件类型
+        desc:
+            Parameters:
+                img_file: 图片文件路径(str)
+                img_endswith: 支持的图像类型后缀(list(str))
+            Returns:
+                (bool)是否为支持的图片类型
+    """
+    if img_file.split('.')[-1] in img_endswith:
+        return True
+    logger.warning("The type of image file: {0} is not support.".format(img_file))
+    return False
 
 class DetDataset(Dataset):
     def __init__(self,
@@ -33,8 +51,8 @@ class DetDataset(Dataset):
             desc:
                 Parameters:
                     dataset_dir: 数据集根目录(str)
-                    image_dir: 根目录下的图片目录(str)
-                    anno_path: 根目录下的标注目录(str)
+                    image_dir: 根目录下的图片所在目录/所在上一级目录(str)
+                    anno_path: 根目录下的标注文件/标注说明文件路径(str)
                     data_fields: 样本数据采样的字典，非fields中指定的数据不保存(list(str))
                     sample_num: 在数据集中的采样数量(int)
                 Returns:
@@ -224,25 +242,6 @@ class ImageFolder(Dataset):
         """
         return self._imid2path
 
-    def check_img_endswith(self,
-                           img_file: str=None,
-                           img_endswith: List[str]=[
-                               'jpg', 'JPG', 'JPEG',
-                               'png', 'PNG',
-                               'bmp', 'BMP']) -> bool:
-        """检查图片类型是否为支持的图片文件类型
-            desc:
-                Parameters:
-                    img_file: 图片文件路径(str)
-                    img_endswith: 支持的图像类型后缀(list(str))
-                Returns:
-                    (bool)是否为支持的图片类型
-        """
-        if img_file.split('.')[-1] in img_endswith:
-            return True
-        logger.warning("The type of image file: {0} is not support.".format(img_file))
-        return False
-
     def get_images(self) -> List[str]:
         """获取数据集图片目录下的所有图片路径
             desc:
@@ -257,7 +256,7 @@ class ImageFolder(Dataset):
             # 默认升序排序
             for _f in sorted(files):
                 im_path = os.path.join(image_dir_path, _f)
-                if self.check_img_endswith(img_file=im_path):
+                if check_img_endswith(img_file=im_path):
                     images.append(im_path)
             # 避免不同操作系统下的差异
             # 只读取当前层次目录的文件搜索
