@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# Test vocdataset class
+# Test dataset class/function
 import os
 import sys
 import numpy as np
@@ -20,28 +20,12 @@ import numpy as np
 # 保证datasets正常调用
 sys.path.append( os.getcwd() )
 
-from datasets import VOCDataset, generate_Vocdataset_and_Voclable
+from datasets import voc2coco
 
-# 1.测试voc格式数据的生成
-# generate_Vocdataset_and_Voclable(
-#     image_dir='C:\\Users\\30208\\Desktop\\KFPEducation\\tests\\dataset\\train\\IMAGES',
-#     anno_dir='C:\\Users\\30208\\Desktop\\KFPEducation\\tests\\dataset\\train\\ANNOTATIONS',
-#     train_ratio=0.75,
-#     output='tests/dataset'
-# )
-
-# 2.测试VOC数据加载
-dataset = VOCDataset(
-    dataset_dir='tests/dataset',
-    label_list='lable_list.txt',
-    image_dir='VOCDataset',
-    anno_path='train_list.txt',
-    data_fields=['image'],
-    sample_num=-1,
-    allow_empty=False,
-    empty_ratio=1.
+voc2coco(
+    image_dir='C:\\Users\\30208\\Desktop\\KFPEducation\\tests\\dataset\\train\\IMAGES',
+    anno_dir='C:\\Users\\30208\\Desktop\\KFPEducation\\tests\\dataset\\train\\ANNOTATIONS',
+    train_ratio=0.99,
+    output='tests/datasets'
 )
 
-dataset.parse_dataset()
-print(dataset.get_cls2id())
-print(dataset[0])
