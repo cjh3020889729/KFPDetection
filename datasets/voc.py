@@ -118,12 +118,12 @@ def generate_Vocdataset_and_Voclable(image_dir: str,
     # 4.保存样本信息以及类别信息
     import random
     random.shuffle(dist_image_anno_list)
-    total_num = min(int(len(dist_image_anno_list)*train_ratio), len(dist_image_anno_list))
-    train_list = dist_image_anno_list[:int(total_num*train_ratio)]
-    if total_num == len(dist_image_anno_list): # 如果训练集取完样本集了，则验证集为空
+    train_num = min(int(len(dist_image_anno_list)*train_ratio), len(dist_image_anno_list))
+    train_list = dist_image_anno_list[:train_num]
+    if train_num == len(dist_image_anno_list): # 如果训练集取完样本集了，则验证集为空
         eval_list = []
     else:
-        eval_list = dist_image_anno_list[int(total_num*train_ratio):]
+        eval_list = dist_image_anno_list[train_num:]
     with open(os.path.join(output, 'train_list.txt'), 'w') as f:
         f.writelines(train_list)
     logger.info("The Dataset has generate {0} samples for Train.".format(

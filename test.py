@@ -11,3 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from datasets import voc2coco
+
+voc2coco(
+    image_dir='C:\\Users\\30208\\Desktop\\KFPEducation\\tests\\dataset\\train\\IMAGES',
+    anno_dir='C:\\Users\\30208\\Desktop\\KFPEducation\\tests\\dataset\\train\\ANNOTATIONS',
+    train_ratio=0.99,
+    output='tests/datasets'
+)
