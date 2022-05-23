@@ -175,7 +175,7 @@ def _read_file_line(logger: logging.Logger,
     line_strs = ''
     with open(file_path, 'r', encoding='utf-8') as f:
         line_strs = f.readlines()[line[0]:line[1]]
-    return '\t'.join(line_strs).strip() # 拼接行范围的数据并去掉首尾空白符
+    return '\t'.join(line_strs) # 拼接行范围的数据并去掉首尾空白符
 
 def error_traceback(logger: logging.Logger,
                     lasterrorline_offset: int=0,
@@ -218,7 +218,7 @@ def error_traceback(logger: logging.Logger,
         # 帧目标行(回溯行)
         e_line = _summary.lineno
         # 利用日志器输出回溯信息
-        logger.error("File \"{0}\", line {1}, in {2}\n\n\t{3}\n".format(
+        logger.error("File \"{0}\", line {1}, in {2}\n\n\t{3}".format(
             e_file, e_line, e_fcuntion_name,
             _read_file_line(
                 logger=logger,
@@ -228,7 +228,7 @@ def error_traceback(logger: logging.Logger,
                 # 因此帧行-1才能得到准确的行
                 line=e_line - 1)))
     # 6.输出最后的回溯帧，需要修正偏移位置
-    logger.error("File \"{0}\", line {1}, in {2}\n\n\t{3}\n".format(
+    logger.error("File \"{0}\", line {1}, in {2}\n\n\t{3}".format(
             last_summary.filename, last_summary.lineno - lasterrorline_offset,
             last_summary.name,
             _read_file_line(

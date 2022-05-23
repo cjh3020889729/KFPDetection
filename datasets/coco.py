@@ -90,7 +90,7 @@ def voc2coco(image_dir: str,
              output: str=None) -> None:
     """将voc数据转为coco数据
     """
-    if output == None or output == '':
+    if output == None:
         try:
             raise ValueError()
         except:
@@ -98,7 +98,7 @@ def voc2coco(image_dir: str,
                             lasterrorline_offset=6,
                             num_lines=1)
             logger.error("Summary: The output should be a existed path,"
-                " but now it's None or ''.")
+                " but now it's None.")
             sys.exit(1)
 
     import time
