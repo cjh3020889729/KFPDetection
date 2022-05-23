@@ -175,7 +175,7 @@ def _read_file_line(logger: logging.Logger,
     line_strs = ''
     with open(file_path, 'r', encoding='utf-8') as f:
         line_strs = f.readlines()[line[0]:line[1]]
-    return '\t'.join(line_strs) # 拼接行范围的数据并去掉首尾空白符
+    return '\t'.join(line_strs) # 拼接行范围的数据，拼接间隔符号为'\t'
 
 def error_traceback(logger: logging.Logger,
                     lasterrorline_offset: int=0,
