@@ -237,12 +237,12 @@ def voc2coco(image_dir: str,
     # dist_train_coco_json = json.dumps(train_coco_records)
     # dist_eval_coco_json = json.dumps(eval_coco_records)
     with open(dist_train_anno_path, 'w') as f:
-        json.dump(train_coco_records, f)
+        json.dump(train_coco_records, f, indent=4)
     logger.info("The convertion has generate {0} samples for Train,".format(
         len(train_coco_records['image'])) + \
         " and has {0} bbox.".format(len(train_coco_records['annotations'])))
     with open(dist_eval_anno_path, 'w') as f:
-        json.dump(eval_coco_records, f)
+        json.dump(eval_coco_records, f, indent=4)
     logger.info("The convertion has generate {0} samples for Train,".format(
         len(eval_coco_records['image'])) + \
         " and has {0} bbox.".format(len(eval_coco_records['annotations'])))
