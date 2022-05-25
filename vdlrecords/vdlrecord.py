@@ -25,6 +25,7 @@ from loggers import create_logger, error_traceback
 logger = create_logger(logger_name='vdlrecord')
 try:
     from visualdl import LogWriter, LogReader
+    from visualdl.server import app
 except :
     logger.warning("The visualdl can't import LogWriter.")
     raise ImportError()
@@ -90,7 +91,8 @@ class VDLCallback(object):
                  file_name: str='',
                  vdl_kind: str='',
                  tags: List[str]=['train/loss', 'eval/loss', 'test/loss'],
-                 display_name: str='') -> None:
+                 display_name: str='',
+                 resume_log: bool=False) -> None:
         """visualdl日志器回调基类实现
             desc:
                 Parameters:
@@ -107,6 +109,7 @@ class VDLCallback(object):
                                使用时务必指定，不能为''
                     tags: 日志器需要记录的不同数据的标识字段(List(str))
                     display_name: 日志可视化界面中显示的日志名称(str)
+                    resume_log: 是否续写日志(日志已经存在则支持)
                 Returns:
                     None
         """
@@ -124,7 +127,16 @@ class VDLCallback(object):
                     tags))
                 sys.exit(1)
 
+        # 0.2基本属性配置
+        self.resume_log = resume_log
+        self.vdl_kind = vdl_kind
+        # 0.3.创建记录器里每个tag记录用step参数
+        #   随着对应tag在__call__中出现一次
+        #   对应的step值+1
+        self.tags_step = {k:0 for k in tags}
+
         # 1.拼接符合要求的日志文件名
+        self.logdir = logdir
         self.log_filename = file_name if file_name=='' \
             else self.file_content + vdl_kind + '.' + file_name
         # 2.检查日志文件名是否合理
@@ -140,19 +152,45 @@ class VDLCallback(object):
                         file_name))
                     sys.exit(1)
         
-        # 3.创建vdl日志记录器
+        # 3.更新日志数据(tags_step或log_file)--根据是否续写
+        self._reload_vdllog()
+        
+        # 4.创建vdl日志记录器
         self._writer = LogWriter(
             logdir=logdir,
             file_name=self.log_filename,
             display_name=display_name
         )
         self.writer_state = True # 日志记录器开启状态
-        
-        # 4.创建记录器里每个tag记录用step参数
-        #   随着对应tag在__call__中出现一次
-        #   对应的step值+1
-        self.tags_step = {k:0 for k in tags}
-    
+
+    def _reload_vdllog(self):
+        """重新生成日志(清空已有数据/更新tags_step)
+            desc:
+                Parameters:
+                    None
+                Returns:
+                    None
+                Others:
+                    - 续写则进行step更新
+                    - 不续写则进行日志文件删除
+        """
+        if self.resume_log == False: # 非续写--清空
+            log_path = os.path.join(self.logdir, self.log_filename)
+            if os.path.isfile(log_path): # 日志存在
+                logger.warning("The log file: {0} will be recreated.".format(log_path))
+                os.remove(path=log_path)
+        else:
+            log_path = os.path.join(self.logdir, self.log_filename)
+            if os.path.isfile(log_path): # 日志存在
+                reader = LogReader(file_path=log_path)
+                _tags = reader.get_tags()[self.vdl_kind]
+                for tag in _tags: # 更新tag的step
+                    if tag in self.tags_step.keys():
+                        _step = reader.get_data(self.vdl_kind, tag)[-1].id
+                        self.tags_step[tag] = _step + 1
+                        logger.info("The log tag: {0} has updated the step-{1}.".format(
+                            _tags, _step + 1))
+
     def get_state(self) -> bool:
         """获取当前日志器状态
             desc:
@@ -239,14 +277,33 @@ class VDLCallback(object):
             " '{0}' class should be reload or implement.".format(self.__class__.__name__))
             sys.exit(1)
     
+    def run(self,
+            port: int=8040,
+            open_browser: bool=False) -> None:
+        """启动日志可视化: 可手动打开浏览器输入: localhost:port号(eg: localhost:8040)
+            desc:
+                Parameters:
+                    port: 本地服务的端口号(自定义7000-9000即可)
+                    open_browser: 启动服务后自动打开浏览器
+                Returns:
+                    None
+                Others:
+                    - 需要在__name__=="__main__"中运行
+        """
+        app.run(logdir=self.logdir,
+                port=port,
+                open_browser=open_browser)
+    
     def __call__(self,
                  tag: str,
-                 data: Any) -> None:
+                 data: Any,
+                 step: int=None) -> None:
         """执行回调，完成指定tag的日志数据写入
             desc:
                 Parameters:
                     tag: 当前数据所属tag(str)
                     data: 日志记录的数据(对应记录器的数据)
+                    step: 使用指定的step进行数据更新(一般为续写)
                 Returns:
                     None
         """
@@ -269,7 +326,14 @@ class VDLCallback(object):
                 logger.error("Summary: The tag don't exist, while the vdlwriter init.(tag: {0})".format(
                     tag))
                 sys.exit(1)
+
+        # 如果指定step，则更新对应tag下的step
+        if step is not None:
+            self.tags_step[tag] = step
+
         self.update(tag=tag, data=data)
+
+        self.tags_step[tag] += 1 # 更新为下一次待写入的step
 
 class ScalarVDL(VDLCallback):
     def __init__(self,
@@ -277,7 +341,8 @@ class ScalarVDL(VDLCallback):
                  file_name: str='',
                  vdl_kind: str='',
                  tags: List[str]=['train/loss'],
-                 display_name: str='') -> None:
+                 display_name: str='',
+                 resume_log: bool=False) -> None:
         """标量日志记录器
         """
         super(ScalarVDL, self).__init__(
@@ -285,7 +350,8 @@ class ScalarVDL(VDLCallback):
             file_name=file_name,
             vdl_kind=vdl_kind,
             tags=tags,
-            display_name=display_name
+            display_name=display_name,
+            resume_log=resume_log
         )
     
     def update(self,
@@ -303,7 +369,6 @@ class ScalarVDL(VDLCallback):
         self._writer.add_scalar(tag=tag,
                                 value=data,
                                 step=self.tags_step[tag])
-        self.tags_step[tag] += 1 # 更新为下一次待写入的step
 
 
 
