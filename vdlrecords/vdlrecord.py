@@ -220,6 +220,7 @@ class VDLCallback(object):
                     None
         """
         self._writer.close()
+        del self._writer
         self.writer_state = False # 日志记录器关闭/失效状态
     
     def reopen(self, logdir: str='vlogs',
