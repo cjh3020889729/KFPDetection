@@ -17,7 +17,7 @@ The Kid From PaddleDetection —— 基于教学的检测平台搭建
 >
 > End Date: ~
 >
-> Update Date: 2022.5.21
+> Update Date: 2022.5.26
 >
 >
 > Package Name: The Kid from PaddleDetection
