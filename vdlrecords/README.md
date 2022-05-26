@@ -2,9 +2,9 @@
 
 > Start Date: 2022.5.20
 > 
-> 修订次数: 2
+> 修订次数: 3
 > 
-> End Date: 2022.5.21
+> End Date: 2022.5.26
 
 分别设计vdl日志记录基类、标量日志记录类。
 
@@ -35,16 +35,19 @@
         - vdl_kind: 日志类型(str)
         - tags: 日志数据分类的tags(list(str))
         - display_name: 日志文件执行可视化时，日志文件显示的名称(str)
+        - resume_log: 是否进行续写日志(bool)
     - 类解读:
+        - class._reload_vdllog: 对已有日志文件进行是否续写的清理操作(删除或更新tags_step)
         - class.get_state: 获取日志器状态: True-正常, False-无效(需要重启reopen)
         - class.get_tags: 获取当前日志类中所有的tag
         - class.release: 释放当前的日志类中的
-        - class.reopen: 如同初始化一样进行日志器重启
+        - class.reopen: 如同初始化一样进行日志器写入器的重启
         - class.update: 更新记录一个日志数据(需要重载实现)
+        - class.run: 执行日志可视化操作 -- 需要在__name__=="__main__"下运行
         - class.__call__: 实现类回调
 
 2. 对于标量日志记录类(logger.py):
-    - 接口类型: 类(ScalarVDL)
+    - 接口类型: 类(ScalarVDL)——继承自VDLCallback
     - 类用途:
         - 作为vdl标量日志记录器的类
     - 初始化参数:
@@ -53,12 +56,15 @@
         - vdl_kind: 日志类型(str)
         - tags: 日志数据分类的tags(list(str))
         - display_name: 日志文件执行可视化时，日志文件显示的名称(str)
+        - resume_log: 是否进行续写日志(bool)
     - 类解读:
+        - class._reload_vdllog: 对已有日志文件进行是否续写的清理操作(删除或更新tags_step)
         - class.get_state: 获取日志器状态: True-正常, False-无效(需要重启reopen)
         - class.get_tags: 获取当前日志类中所有的tag
         - class.release: 释放当前的日志类中的
-        - class.reopen: 如同初始化一样进行日志器重启
-        - class.update: 更新记录一个日志数据(实现标量日志数据记录)
+        - class.reopen: 如同初始化一样进行日志器写入器的重启
+        - class.update: 更新记录一个标量日志数据
+        - class.run: 执行日志可视化操作 -- 需要在__name__=="__main__"下运行
         - class.__call__: 实现类回调
 
 3.对于多余日志文件的清理(logger.py):

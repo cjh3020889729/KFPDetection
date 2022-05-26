@@ -31,7 +31,7 @@ The Kid From PaddleDetection —— 基于教学的检测平台搭建
 > 
 > over-7.2
 > 
-> todo-0.1(VOC已完成，开始构建COCO)
+> todo-0.1(VOC加载与数据生成已完成，开始构建COCO加载)
 
 - 0.实现数据加载(预处理)
     - 0.1 数据加载(dir at ./datasets): VOC + COCO
