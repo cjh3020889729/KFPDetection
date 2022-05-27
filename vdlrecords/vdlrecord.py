@@ -183,7 +183,20 @@ class VDLCallback(object):
             log_path = os.path.join(self.logdir, self.log_filename)
             if os.path.isfile(log_path): # 日志存在
                 reader = LogReader(file_path=log_path)
-                _tags = reader.get_tags()[self.vdl_kind]
+                _kinds = reader.get_tags()
+                if len(_kinds) <= 1:
+                    try:
+                        raise ValueError()
+                    except:
+                        error_traceback(logger=logger,
+                                        lasterrorline_offset=6,
+                                        num_lines=1)
+                        logger.error("Summary: The _kinds: {0} have not truth data kind.".format(
+                            _kinds) + \
+                            "Maybe the log_file: {1} is empty.".format(
+                            log_path))
+                        sys.exit(1)
+                _tags = _kinds[self.vdl_kind]
                 for tag in _tags: # 更新tag的step
                     if tag in self.tags_step.keys():
                         _step = reader.get_data(self.vdl_kind, tag)[-1].id
@@ -219,9 +232,14 @@ class VDLCallback(object):
                 Returns:
                     None
         """
-        self._writer.close()
-        del self._writer
-        self.writer_state = False # 日志记录器关闭/失效状态
+        if self.writer_state == False:
+            logger.warning("The visualdl writer has finished to work,"
+                " so it can't stop again.")
+        else:
+            self._writer.close()
+            del self._writer
+            self._writer = None
+            self.writer_state = False # 日志记录器关闭/失效状态
     
     def reopen(self, logdir: str='vlogs',
                      file_name: str='',
@@ -247,10 +265,10 @@ class VDLCallback(object):
                 Returns:
                     None
         """
-        if self.writer_state == True: # 本身还在运行
-            self.release() # 释放已有日志器
+        if self.writer_state == True: # 本身写入器还在工作
+            self.release() # 释放已有日志写入器
         
-        # 重调init完成初始化
+        # 总是重调init完成初始化和当前对象的写入器重建
         self.__init__(logdir=logdir,
                       file_name=file_name,
                       vdl_kind=vdl_kind,
