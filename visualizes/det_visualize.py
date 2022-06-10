@@ -70,7 +70,8 @@ def colormap(rgb: bool=False) -> np.ndarray:
 # 还未替换日志输出，仍然为标准输出
 def visualize_img(img: Union[np.ndarray, str],
                   save_path: Union[None, str]=None,
-                  show_img: bool=False) -> None:
+                  show_img: bool=False,
+                  is_rgb: bool=False) -> None:
     """利用pyplot可视化图像
         desc(描述):
             Parameters:
@@ -78,12 +79,14 @@ def visualize_img(img: Union[np.ndarray, str],
                 save_path: None或可视化结果图像的保存路径(str)
                            如果为None，则不保存
                 show_img: 是否使用pyplot显示可视化结果(bool)
+                is_rgb: 是否为RGB格式的图像数据，保证图像显示和保存时的色域正确
             Returns:
                 None
     """
     if isinstance(img, str): # 为图像路径时
         if os.path.exists(img): # 路径存在
-            img=Image.open(img) # 读取图像
+            img = Image.open(img) # 读取图像 -- rgb格式/gray格式
+            is_rgb = True
         else: # 不存在的路径，抛出值异常
             try:
                 raise ValueError()
@@ -104,11 +107,26 @@ def visualize_img(img: Union[np.ndarray, str],
             error_traceback(logger=logger,
                             lasterrorline_offset=22,
                             num_lines=19)
-            logger.error('The img only support numpy.ndarray or str.(type: {0})'.format(
+            logger.error('Summary: The img only support numpy.ndarray or str.(type: {0})'.format(
                 type(img)))
             sys.exit(1)
     
+    # 至少有一种可视化指令打开
+    if show_img==False and save_path is None:
+        try:
+            raise ValueError()
+        except:
+            error_traceback(logger=logger,
+                            lasterrorline_offset=6,
+                            num_lines=3)
+            logger.error('Summary: The function of visualize should open the show_img or enter the save_path.')
+            sys.exit(1)
+    
     if show_img:
+        if is_rgb == False: # 输入图像数据为BGR格式
+            # 三通道图像时，则将opencv的BGR转为RGB格式
+            if len(img.shape)==3 and img.shape[2]==3:
+                img = img[:, :, ::-1]
         # 可视化窗口显示图像
         plt.figure("visualize result") # 图像窗口命令
         plt.imshow(img) # 显示图像
@@ -118,6 +136,10 @@ def visualize_img(img: Union[np.ndarray, str],
 
     # 保存可视化图像
     if save_path: # 路径不为None
+        if is_rgb == True: # 图像格式为RGB
+            # 三通道图像时，则将RGB格式转为opencv的BGR格式
+            if len(img.shape)==3 and img.shape[2]==3:
+                img = img[:, :, ::-1]
         try: # 尝试保存图像
             cv2.imwrite(save_path, img)
             logger.info("The visualize result has save at: {0}.".format(save_path))
@@ -221,11 +243,11 @@ def visualize_bbox(bboxs: np.ndarray,
             # lables为None时直接使用class_id进行可视化
             cls_name = lables[int(cls_id)] + '-' + str(round(score, 2)) if \
                        lables is not None else str(int(cls_id)) + '-' + str(round(score, 2))
-            cv2.putText(draw_board, cls_name + '-' + str(round(score, 2)),
+            cv2.putText(draw_board, cls_name,
                         (int(bbox[0]), int(bbox[1])-font_y_offset), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=font_scale, color=_color, thickness=font_thickness)
 
-    return draw_board
+    return draw_board, use_rgb
 
 def visualize_det(img, cls_and_bboxs,
                   score_threshold: float=0.5,
@@ -253,14 +275,14 @@ def visualize_det(img, cls_and_bboxs,
                 shape: 与输入真实图像一致
     """
     # 可视化bbox到目标图像
-    visualize_result = visualize_bbox(bboxs=cls_and_bboxs,
-                                      draw_board=img,
-                                      score_threshold=score_threshold,
-                                      lables=lables,
-                                      use_rgb=use_rgb)
+    visualize_result, _is_rgb = visualize_bbox(bboxs=cls_and_bboxs,
+                                                draw_board=img,
+                                                score_threshold=score_threshold,
+                                                lables=lables,
+                                                use_rgb=use_rgb)
 
     # 可视化窗口展示与可视化结果图像保存
-    visualize_img(visualize_result, save_path=save_path, show_img=show_img)
+    visualize_img(visualize_result, save_path=save_path, show_img=show_img, is_rgb=_is_rgb)
 
     # 返回后续可能会用上的可视化结果
     return visualize_result
