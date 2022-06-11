@@ -149,7 +149,7 @@ def visualize_img(img: Union[np.ndarray, str],
 def visualize_bbox(bboxs: np.ndarray,
                    draw_board: np.ndarray,
                    score_threshold: float=0.5,
-                   lables: Union[Sequence[str], Dict[int, str]]=None,
+                   labels: Union[Sequence[str], Dict[int, str]]=None,
                    use_rgb: bool=False) -> np.ndarray:
     """可视化bbox
         desc(描述):
@@ -241,8 +241,8 @@ def visualize_bbox(bboxs: np.ndarray,
         if cls_id is not None: # 存在类别信息时
             # 可视化class_name的预处理
             # lables为None时直接使用class_id进行可视化
-            cls_name = lables[int(cls_id)] + '-' + str(round(score, 2)) if \
-                       lables is not None else str(int(cls_id)) + '-' + str(round(score, 2))
+            cls_name = labels[int(cls_id)] + '-' + str(round(score, 2)) if \
+                       labels is not None else str(int(cls_id)) + '-' + str(round(score, 2))
             cv2.putText(draw_board, cls_name,
                         (int(bbox[0]), int(bbox[1])-font_y_offset), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=font_scale, color=_color, thickness=font_thickness)
@@ -252,7 +252,7 @@ def visualize_bbox(bboxs: np.ndarray,
 def visualize_det(img, cls_and_bboxs,
                   score_threshold: float=0.5,
                   save_path: Union[None, str]=None,
-                  lables: Union[Sequence[str], Dict[int, str]]=None,
+                  labels: Union[Sequence[str], Dict[int, str]]=None,
                   use_rgb: bool=False,
                   show_img: bool=False) -> np.ndarray:
     """可视化检测模型的输出结果
@@ -278,7 +278,7 @@ def visualize_det(img, cls_and_bboxs,
     visualize_result, _is_rgb = visualize_bbox(bboxs=cls_and_bboxs,
                                                 draw_board=img,
                                                 score_threshold=score_threshold,
-                                                lables=lables,
+                                                labels=labels,
                                                 use_rgb=use_rgb)
 
     # 可视化窗口展示与可视化结果图像保存

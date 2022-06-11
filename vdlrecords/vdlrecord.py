@@ -51,7 +51,7 @@ def clear_vdlrecord_dir(log_dir: str='vlogs',
             Returns:
                 None
     """
-    if not os.path.isdir(log_dir): # 待清空日志路径不是目录
+    if not os.path.isdir(log_dir): # 待清空日志路径不是目录或不存在
         try:
             raise ValueError()
         except:
@@ -61,10 +61,10 @@ def clear_vdlrecord_dir(log_dir: str='vlogs',
             logger.error("Summary: The log_dir should be a dir, but now it's not.(path at: {0})".format(
                 log_dir))
             sys.exit(1)
-    if not os.path.exists(log_dir): # 待清空目录不存在
-        logger.warning('The log_dir is not exist.(path at: {0})'.format(
-            log_dir))
-        return
+    # if not os.path.exists(log_dir): # 待清空目录不存在
+    #     logger.warning('The log_dir is not exist.(path at: {0})'.format(
+    #         log_dir))
+    #     return
     # 遍历目录下的所有文件
     clear_num = 0 # 清楚日志文件数量
     for _, _, files in os.walk(log_dir):
