@@ -203,9 +203,9 @@ def visualize_bbox(bboxs: np.ndarray,
             sys.exit(1)
 
     # 图像通道检查: 由于colormap为三通道的，所以强制所有可视化为三通道
-    if len(draw_board.shape) == 1: # 单通道图像的处理方式
-        draw_board = np.vstack([draw_board, draw_board, draw_board])
-    elif len(draw_board.shape) >= 4: # 多通道图像的处理方式
+    if len(draw_board.shape) == 2: # 单通道图像的处理方式
+        draw_board = np.stack([draw_board]*3, axis=-1)
+    elif len(draw_board.shape) == 3 and draw_board.shape[2] >= 4: # 多通道图像的处理方式
         draw_board = draw_board[:, :, :3]
     
     # 图像大小获取
